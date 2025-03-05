@@ -2,9 +2,11 @@
 
 import React, { useState } from 'react';
 import { View, StyleSheet, Dimensions} from 'react-native';
-import { TextInput, Button, Checkbox } from 'react-native-paper';
+import { TextInput, Button, Checkbox, Text } from 'react-native-paper';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
+import  TagInputComponent  from '../components/tag.input';
+
 
 const { width } = Dimensions.get('window');
 
@@ -15,6 +17,7 @@ export default function DreamForm() {
   const [hashtag1, setHashtag1] = useState('');
   const [hashtag2, setHashtag2] = useState('');
   const [hashtag3, setHashtag3] = useState('');
+  const [hashtags, setHastags] = useState([]);
 
 
   const handleDreamSubmission = async () => {
@@ -99,6 +102,12 @@ export default function DreamForm() {
         style={[styles.input, { width: width * 0.8, alignSelf: 'center' }]}
       />
 
+      <TagInputComponent
+        tags={hashtags}
+        setTags={setHastags}
+        on
+      />
+
       <View style={styles.checkboxContainer}>
         <Checkbox.Item
           label="Rêve Lucide"
@@ -134,6 +143,10 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 8,
   },
+
+  
 });
+
+
 
   
