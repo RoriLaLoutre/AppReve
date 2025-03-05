@@ -1,12 +1,11 @@
 import { StyleSheet } from 'react-native';
+
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
-import DreamList from '@/components/DreamList';
 
-export default function TabTwoScreen() {
+export default function TabThreeScreen() {
   return (
     <View style={styles.container}>
-      <DreamList/>
     </View>
   );
 }
