@@ -13,8 +13,6 @@ export default function DreamList() {
   const [researchText, setresearchText] = useState('');
   const [researchedDreams, setresearchedDreams] = useState([]);
 
-
-  // Ce useEffect est executé a chaque fois que le composant est affiché
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
@@ -56,45 +54,46 @@ export default function DreamList() {
   };
   
 
-  //  useEffect( () => {
-  //       const fetchFilteredDreams = async () => {
-  //           if (!researchText) {
-  //               setresearchedDreams(dreams)
-  //               return
-  //           }
-  //           const search_hashtag_id = await findHashtagIdByLabel(researchText)
+  useEffect(() => {
+    const fetchFilteredDreams = () => {
+      if (researchText.trim() === '') {
+        setresearchedDreams(dreams); //si la recherche est vide, on affiche tout
+        return;
+      }
+  
+      const filtered = dreams.filter((dream) => {
 
-  //           const results = dreams.filter((dream) => {
-  //               if (search_hashtag_id) {
-  //                   const dream_hashtags = dream.hashtags.map((hashtag) => {
-  //                       return hashtag.id
-  //                   })
-  //                   if (researchText === "" || dream_hashtags.includes(search_hashtag_id)) {
-  //                       return dream
-  //                   }
-  //               }
-  //           });
-
-  //           setresearchedDreams(results);
-  //           return
-  //       }
-  //       fetchFilteredDreams()
-  //   }, [researchText, dreams]);
+        if (Array.isArray(dream.hashtags)) {
+          return dream.hashtags.some(tag =>
+            tag.toLowerCase() === researchText.trim().toLowerCase()
+          );
+        }
+        return false;
+      });
+  
+      setresearchedDreams(filtered);
+    };
+  
+    fetchFilteredDreams();
+  }, [researchText, dreams]);
 
 
 
   return (
     <ScrollView>
       <TextInput
-        label="Rechercher un rêve avec un hashtag"
+        label="Recherche par mot clé"
         value={researchText}
         onChangeText={setresearchText}
         mode="outlined"
+        style={{ marginTop: 10,
+          marginBottom:10
+        }}
       />
 
 <Text style={styles.title}>Liste des Rêves :</Text>
 
-{dreams.map((dream, index) => (
+{researchedDreams.map((dream, index) => (
   <View key={index} style={styles.dreamCard}>
     <Text style={styles.date}>
       📅 {dream.date}
@@ -133,8 +132,8 @@ export default function DreamList() {
     <Button 
       mode="text" 
       onPress={() => deleteDream(index)} 
-      style={{ marginTop: 8 }} 
-      textColor="#E53935"
+      style={styles.deleteButton} 
+      labelStyle={styles.deleteButtonText}
     >
       🗑️ Supprimer
     </Button>
@@ -176,6 +175,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 6,
+  },
+  deleteButton: {
+    backgroundColor: '#ff514d',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    alignSelf: 'center', // pour que le bouton prenne juste la taille du contenu
+    marginTop: 8,
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   }
   
 });
