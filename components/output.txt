@@ -1,0 +1,921 @@
+
+======================================================================================
+
+Contenu du fichier : DreamForm.tsx
+
+======================================================================================
+// components/DreamForm.tsx
+import React, { useState } from 'react';
+import { View, StyleSheet, Dimensions, ImageBackground} from 'react-native';
+import { RadioButton, TextInput, Button, Checkbox, Text } from 'react-native-paper';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
+import  TagInputComponent  from '../components/tag.input';
+import RNPickerSelect from 'react-native-picker-select';
+import {Slider} from '@miblanchard/react-native-slider';
+
+
+const { width } = Dimensions.get('window');
+
+export default function DreamForm() {
+  const [dreamText, setDreamText] = useState('');
+  const [isLucidDream, setIsLucidDream] = useState(false);
+  const [day, setDay] = useState('');
+  // const [hashtag1, setHashtag1] = useState('');
+  // const [hashtag2, setHashtag2] = useState('');
+  // const [hashtag3, setHashtag3] = useState('');
+  const [hashtags, setHashtags] = useState([]);
+  const [radioBeforeValue, setRadioBeforeValue] = useState('normal');
+  const [radioAfterValue, setRadioAfterValue] = useState('normal');
+  const [clarte, setClarte] = useState(0);
+  const [intensite, setIntensite] = useState(0);
+
+
+  // const handleDreamSubmission = async () => {
+
+  //   try {
+  //     // Récupérer le tableau actuel depuis AsyncStorage
+  //     const existingData = await AsyncStorage.getItem('dreamFormDataArray');
+  //     const formDataArray = existingData ? JSON.parse(existingData) : [];
+
+  //     // const hashtag1Id = await findHashtagIdByLabel(hashtag1);
+  //     // const hashtag2Id = await findHashtagIdByLabel(hashtag2);
+  //     // const hashtag3Id = await findHashtagIdByLabel(hashtag3);
+
+
+  //     // Ajouter le nouveau formulaire au tableau
+  //     formDataArray.push({
+  //       dreamText: dreamText,
+  //       isLucidDream: isLucidDream,
+  //       todayDate: day,
+  //       hashtags: [
+  //         // { id: hashtag1Id, label: hashtag1 },
+  //         // { id: hashtag2Id, label: hashtag2 },
+  //         // { id: hashtag3Id, label: hashtag3 },
+  //       ],
+  //     });
+
+  //     // Sauvegarder le tableau mis à jour dans AsyncStorage
+  //     await AsyncStorage.setItem('dreamFormDataArray', JSON.stringify(formDataArray));
+
+  //     console.log(
+  //       'AsyncStorage: ',
+  //       AsyncStorage.getItem('dreamFormDataArray')
+  //     );
+
+  //   } catch (error) {
+
+  //     console.error('Erreur lors de la sauvegarde des données:', error);
+  //   }
+
+  //   setDreamText('');
+  //   setIsLucidDream(false);
+  //   // setHashtag1('');
+  //   // setHashtag2('');
+  //   // setHashtag3('');
+  // };
+
+  const handleDreamSubmission = async () => {
+    try {
+      const existingData = await AsyncStorage.getItem('dreamFormDataArray');
+      const formDataArray = existingData ? JSON.parse(existingData) : [];
+  
+      if (day === "") {
+        const today = new Date();
+        const formattedDate = today.toISOString().split('T')[0]; // date du jour au format YYYY-MM-DD
+        setDay(formattedDate );
+      }
+      const newDream = {
+        dreamText,
+        isLucidDream,
+        date: day,
+        hashtags: hashtags, // liste
+        etatAvant: radioBeforeValue,
+        etatApres: radioAfterValue,
+        intensite,
+        clarte,
+      };
+  
+      formDataArray.push(newDream);
+  
+      await AsyncStorage.setItem('dreamFormDataArray', JSON.stringify(formDataArray));
+  
+      // Affichage dans la console pour debug
+      console.log('Données sauvegardées :', newDream);
+  
+      // Reset des champs
+      setDreamText('');
+      setIsLucidDream(false);
+      setHashtags([]);
+      setDay('');
+      setRadioBeforeValue('normal');
+      setRadioAfterValue('normal');
+      setIntensite(0);
+      setClarte(0);
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde des données:', error);
+    }
+  };
+
+
+  return (
+    <View style={styles.container}>
+      <TextInput
+        label="Racontez votre rêve"
+        value={dreamText}
+        onChangeText={(text) => setDreamText(text)}
+        mode="outlined"
+        multiline
+        numberOfLines={6}
+        style={[styles.input, { width: width * 0.8, alignSelf: 'center' } , styles.button]}
+      />
+
+      {/* <TextInput
+        label="Hashtag 1"
+        value={hashtag1}
+        onChangeText={(hashtag1) => setHashtag1(hashtag1)}
+        mode="outlined"
+        style={[styles.input, { width: width * 0.8, alignSelf: 'center' }]}
+      />
+
+      <TextInput
+        label="Hashtag 2"
+        value={hashtag2}
+        onChangeText={(hashtag2) => setHashtag2(hashtag2)}
+        mode="outlined"
+        style={[styles.input, { width: width * 0.8, alignSelf: 'center' }]}
+      />
+
+      <TextInput
+        label="Hashtag 3"
+        value={hashtag3}
+        onChangeText={(hashtag3) => setHashtag3(hashtag3)}
+        mode="outlined"
+        style={[styles.input, { width: width * 0.8, alignSelf: 'center' }]}
+      /> */}
+
+      <RNPickerSelect
+        onValueChange={(value) => console.log(value)}
+        placeholder={{ label: 'Sélectionner un type de rêve', value: "ordinaire" }}
+        items={[
+          { label: 'Cauchemar', value: 'cauchemar' },
+          { label: 'Rêve ordinaire', value: 'ordinaire' },
+          { label: 'Rêve agréable', value: 'agreable' },
+        ]}
+      />
+
+
+    <View style={styles.row}>
+      <RadioButton.Group onValueChange={newValue => setRadioBeforeValue(newValue)} value={radioBeforeValue}>
+      <Text style={styles.smallfont}>Votre état avant le rêve : </Text>
+        <View>
+          <Text style={styles.smallfont}>bien 🙂</Text>
+          <RadioButton color='#4CAF50' value="bien" />
+        </View>
+        <View>
+          <Text style={styles.smallfont}>normal 😐</Text>
+          <RadioButton value="normal" />
+        </View>
+        <View>
+          <Text style={styles.smallfont}>mal 🙁</Text>
+          <RadioButton color="#FF6347" value="mal" />
+        </View>
+      </RadioButton.Group>
+
+      <RadioButton.Group onValueChange={newValue => setRadioAfterValue(newValue)} value={radioAfterValue}>
+      <Text style={styles.smallfont}>Votre état après le rêve : </Text>
+        <View>
+          <Text style={styles.smallfont}>bien 🙂</Text>
+          <RadioButton color='#4CAF50' value="bien" />
+        </View>
+        <View>
+          <Text style={styles.smallfont}>normal 😐</Text>
+          <RadioButton value="normal" />
+        </View>
+        <View>
+          <Text style={styles.smallfont}>mal 🙁</Text>
+          <RadioButton color="#FF6347" value="mal" />
+        </View>
+      </RadioButton.Group>
+    </View>
+
+    
+    <View style={styles.container}>
+      <Text>Intensité du rêve</Text>
+      <Slider
+        value={intensite}
+        onValueChange={newValue => setIntensite(newValue[0])}
+        minimumValue={0}
+        maximumValue={10}
+        step={0.05}
+        thumbTintColor='#FF6347'
+      />
+    </View>
+
+    <View style={styles.container}>
+      <Text>Clarté du rêve</Text>
+      <Slider
+        value={clarte}
+        onValueChange={newValue => setClarte(newValue[0])}
+        minimumValue={0}
+        maximumValue={10}
+        step={0.05}
+        thumbTintColor='#FF6347'
+      />
+    </View>
+
+    <View>
+      <Text>Mots clés (lieu, personnes, situation etc...)</Text>
+      <TagInputComponent
+        tags={hashtags}
+        setTags={setHashtags}
+      />
+    </View>
+
+    <View style={styles.checkboxContainer}>
+      <Checkbox.Item
+        label="Rêve Lucide"
+        status={isLucidDream ? 'checked' : 'unchecked'}
+        onPress={() => setIsLucidDream(!isLucidDream)
+        }
+    />
+    </View>
+
+    <View>
+      <Calendar
+        onDayPress={(day) => {setDay(day.dateString);
+        }}
+        style={styles.borderbox}
+      />
+    </View>
+
+    {/* <View>
+      <Button mode="outlined" onPress={() => {
+        console.log("Texte du rêve :", dreamText);
+        console.log("Lucide :", isLucidDream);
+        console.log("Date :", day);
+        console.log("Hashtags :", hashtags);
+        console.log("État avant :", radioBeforeValue);
+        console.log("État après :", radioAfterValue);
+        console.log("Intensité :", intensite);
+        console.log("Clarté :", clarte);
+        }}>
+        Debug
+      </Button>
+    </View> */}
+
+    <View style={styles.button}>
+      <Button mode="contained" onPress={handleDreamSubmission}>
+        Envoyer
+      </Button>
+    </View>
+
+  </View>
+  );
+}
+
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    marginLeft: 16,
+    marginRight: 16,
+  },
+  input: {
+    marginBottom: 16,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  button: {
+    marginTop: 20,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 16,
+    marginTop: 16,
+  },
+  image: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  color:{
+    color: '#fff',
+  },
+  smallfont:{
+    fontSize: 10,
+  },
+  borderbox:{
+    borderWidth: 1,
+    borderColor: '#000',
+    borderRadius: 8,
+    boxShadow : '0 4px 8px rgba(0, 0, 0, 0.2)',
+  }
+
+
+
+  
+});
+
+
+
+  0
+======================================================================================
+
+Contenu du fichier : DreamList.tsx
+
+======================================================================================
+// components/DreamList.tsx
+
+import React, { useCallback, useEffect, useState } from 'react';
+import {ScrollView, View, Text, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from 'expo-router';
+import { TextInput , Button } from 'react-native-paper';
+
+
+export default function DreamList() {
+
+  const [dreams, setDreams] = useState([]);
+  const [researchText, setresearchText] = useState('');
+  const [researchedDreams, setresearchedDreams] = useState([]);
+
+
+  // Ce useEffect est executé a chaque fois que le composant est affiché
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const data = await AsyncStorage.getItem('dreamFormDataArray');
+          const dreamFormDataArray = data ? JSON.parse(data) : [];
+  
+          setDreams(dreamFormDataArray);
+        } catch (error) {
+          console.error('Erreur lors de la récupération des données:', error);
+        }
+      };
+  
+      fetchData();
+    }, [])
+  );
+
+  const deleteDream = async (indexToDelete) => {
+    try {
+      const existingData = await AsyncStorage.getItem('dreamFormDataArray');
+      let dreamFormDataArray = existingData ? JSON.parse(existingData) : [];
+  
+      dreamFormDataArray.splice(indexToDelete, 1); // retire l'index
+  
+      await AsyncStorage.setItem('dreamFormDataArray', JSON.stringify(dreamFormDataArray));
+  
+      setDreams(dreamFormDataArray);
+  
+      console.log(`Rêve à l'index ${indexToDelete} supprimé ✅`);
+    } catch (error) {
+      console.error('Erreur lors de la suppression du rêve:', error);
+    }
+  };
+  
+
+  //  useEffect( () => {
+  //       const fetchFilteredDreams = async () => {
+  //           if (!researchText) {
+  //               setresearchedDreams(dreams)
+  //               return
+  //           }
+  //           const search_hashtag_id = await findHashtagIdByLabel(researchText)
+
+  //           const results = dreams.filter((dream) => {
+  //               if (search_hashtag_id) {
+  //                   const dream_hashtags = dream.hashtags.map((hashtag) => {
+  //                       return hashtag.id
+  //                   })
+  //                   if (researchText === "" || dream_hashtags.includes(search_hashtag_id)) {
+  //                       return dream
+  //                   }
+  //               }
+  //           });
+
+  //           setresearchedDreams(results);
+  //           return
+  //       }
+  //       fetchFilteredDreams()
+  //   }, [researchText, dreams]);
+
+
+
+  return (
+    <ScrollView>
+      <TextInput
+        label="Rechercher un rêve avec un hashtag"
+        value={researchText}
+        onChangeText={setresearchText}
+        mode="outlined"
+      />
+
+<Text style={styles.title}>Liste des Rêves :</Text>
+
+{dreams.map((dream, index) => (
+  <View key={index} style={styles.dreamCard}>
+    <Text style={styles.date}>
+      📅 {dream.date}
+    </Text>
+
+    <Text style={styles.text}>
+    📝 {dream.dreamText.length > 27 
+        ? dream.dreamText.substring(0, 27) + '...' 
+        : dream.dreamText}
+
+    </Text>
+
+    <Text style={styles.text}>
+      🔮 {dream.isLucidDream ? 'Rêve : Lucide' : 'Rêve : Non Lucide'}
+    </Text>
+
+    <Text style={styles.text}>
+      🧠 Avant : {dream.etatAvant} / Après : {dream.etatApres}
+    </Text>
+
+    <Text style={styles.text}>
+      🌡️ Intensité : {parseFloat(dream.intensite).toFixed(2)} / 🔆 Clarté : {parseFloat(dream.clarte).toFixed(2)}
+    </Text>
+    
+
+    {dream.hashtags.length == 0 ? "aucun mot clé :" : (
+      <Text style={styles.text}>
+        🏷️ Hashtags : {dream.hashtags.map(tag => tag.label).join(', ')}
+      </Text>
+    )}
+
+    <Button 
+      mode="text" 
+      onPress={() => deleteDream(index)} 
+      style={{ marginTop: 8 }} 
+      textColor="#E53935"
+    >
+      🗑️ Supprimer
+    </Button>
+
+  </View>
+))}
+    </ScrollView>
+  );
+}
+
+
+const styles = StyleSheet.create({
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  dreamText: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+
+  dreamCard: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    padding: 15,
+    margin: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  text: {
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  date: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 6,
+  }
+  
+});
+0
+======================================================================================
+
+Contenu du fichier : EditScreenInfo.tsx
+
+======================================================================================
+import React from 'react';
+import { StyleSheet } from 'react-native';
+
+import { ExternalLink } from './ExternalLink';
+import { MonoText } from './StyledText';
+import { Text, View } from './Themed';
+
+import Colors from '@/constants/Colors';
+
+export default function EditScreenInfo({ path }: { path: string }) {
+  return (
+    <View>
+      <View style={styles.getStartedContainer}>
+        <Text
+          style={styles.getStartedText}
+          lightColor="rgba(0,0,0,0.8)"
+          darkColor="rgba(255,255,255,0.8)">
+          Open up the code for this screen:
+        </Text>
+
+        <View
+          style={[styles.codeHighlightContainer, styles.homeScreenFilename]}
+          darkColor="rgba(255,255,255,0.05)"
+          lightColor="rgba(0,0,0,0.05)">
+          <MonoText>{path}</MonoText>
+        </View>
+
+        <Text
+          style={styles.getStartedText}
+          lightColor="rgba(0,0,0,0.8)"
+          darkColor="rgba(255,255,255,0.8)">
+          Change any of the text, save the file, and your app will automatically update.
+        </Text>
+      </View>
+
+      <View style={styles.helpContainer}>
+        <ExternalLink
+          style={styles.helpLink}
+          href="https://docs.expo.io/get-started/create-a-new-app/#opening-the-app-on-your-phonetablet">
+          <Text style={styles.helpLinkText} lightColor={Colors.light.tint}>
+            Tap here if your app doesn't automatically update after making changes
+          </Text>
+        </ExternalLink>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  getStartedContainer: {
+    alignItems: 'center',
+    marginHorizontal: 50,
+  },
+  homeScreenFilename: {
+    marginVertical: 7,
+  },
+  codeHighlightContainer: {
+    borderRadius: 3,
+    paddingHorizontal: 4,
+  },
+  getStartedText: {
+    fontSize: 17,
+    lineHeight: 24,
+    textAlign: 'center',
+  },
+  helpContainer: {
+    marginTop: 15,
+    marginHorizontal: 20,
+    alignItems: 'center',
+  },
+  helpLink: {
+    paddingVertical: 15,
+  },
+  helpLinkText: {
+    textAlign: 'center',
+  },
+});
+0
+======================================================================================
+
+Contenu du fichier : ExternalLink.tsx
+
+======================================================================================
+import { Link } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
+import React from 'react';
+import { Platform } from 'react-native';
+
+export function ExternalLink(
+  props: Omit<React.ComponentProps<typeof Link>, 'href'> & { href: string }
+) {
+  return (
+    <Link
+      target="_blank"
+      {...props}
+      // @ts-expect-error: External URLs are not typed.
+      href={props.href}
+      onPress={(e) => {
+        if (Platform.OS !== 'web') {
+          // Prevent the default behavior of linking to the default browser on native.
+          e.preventDefault();
+          // Open the link in an in-app browser.
+          WebBrowser.openBrowserAsync(props.href as string);
+        }
+      }}
+    />
+  );
+}
+0
+======================================================================================
+
+Contenu du fichier : StyledText.tsx
+
+======================================================================================
+import { Text, TextProps } from './Themed';
+
+export function MonoText(props: TextProps) {
+  return <Text {...props} style={[props.style, { fontFamily: 'SpaceMono' }]} />;
+}
+0
+======================================================================================
+
+Contenu du fichier : tag.input.tsx
+
+======================================================================================
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+
+const TagInputComponent = ({tags, setTags}) => {
+    const [text, setText] = useState('');
+    const [editIndex, setEditIndex] = useState(null);
+
+    const addTag = () => {
+        if (text.trim() !== '') {
+            if (editIndex !== null) {
+
+                // If editing an existing tag
+                const newTags = [...tags];
+                newTags[editIndex] = text.trim();
+                setTags(newTags);
+                setEditIndex(null);
+            } else {
+
+                // If adding a new tag
+                setTags([...tags, text.trim()]);
+            }
+            setText('');
+        }
+    };
+
+    const removeTag = (index) => {
+        const newTags = [...tags];
+        newTags.splice(index, 1);
+        setTags(newTags);
+    };
+
+    const editTag = (index) => {
+        const tagToEdit = tags[index];
+        setText(tagToEdit);
+        setEditIndex(index);
+    };
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.tagContainer}>
+                {tags.map((tag, index) => (
+                    console.log(tags),
+                    <View key={index} 
+                        style={styles.tagWrapper}>
+                        <TouchableOpacity 
+                            onPress={() => editTag(index)} 
+                            style={styles.tag}>
+                            <Text style={styles.tagText}>
+                                {tag}
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            onPress={() => removeTag(index)}
+                            style={styles.removeButton}>
+                            <Text style={styles.removeButtonText}>
+                                X
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                ))}
+            </View>
+            <View style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Ajouter des mots clé"
+                    value={text}
+                    onChangeText={setText}
+                    onSubmitEditing={addTag}
+                />
+                <TouchableOpacity onPress={addTag} 
+                    style={styles.addButton}>
+                    <Text style={styles.buttonText}>
+                        {editIndex !== null ? 'Update' : 'Ajouter'}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+};
+
+const tagInput = () => {
+    return (
+        <View style={styles.appContainer}>
+            <TagInputComponent />
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    appContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+        backgroundColor: '#F5F5F5',
+    },
+    container: {
+        minWidth: '100%',
+        width: '100%',
+        paddingHorizontal: 20,
+
+    },
+    tagContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginBottom: 10,
+    },
+    tagWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 5,
+        marginRight: 5,
+        paddingHorizontal: 5,
+        borderRadius: 5,
+        backgroundColor: '#ccc'
+    },
+    tag: {
+        backgroundColor: '#ccc',
+        borderRadius: 4,
+        paddingHorizontal: 5,
+        paddingVertical: 5,
+    },
+    tagText: {
+        color: 'black',
+        fontWeight: 'bold',
+        fontSize: 12,
+    },
+    removeButton: {
+        marginLeft: 5,
+        paddingHorizontal: 5,
+        borderRadius: 3,
+        backgroundColor: '#E53935',
+    },
+    removeButtonText: {
+        color: '#FFFFFF',
+        fontSize: 13,
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    input: {
+        flex: 1,
+        height: 40,
+        borderColor: '#CCCCCC',
+        borderWidth: 1,
+        paddingHorizontal: 10,
+        borderRadius: 5,
+        marginRight: 10,
+        backgroundColor: '#FFFFFF',
+        color:"#aaa",
+        fontWeight: 'bold',
+        width: '100%',
+        minWidth: "80%",
+        fontSize: 10,
+    },
+    addButton: {
+        backgroundColor: '#4CAF50',
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        borderRadius: 5,
+        minWidth: "20%"
+    },
+    buttonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+});
+
+export default TagInputComponent;
+0
+======================================================================================
+
+Contenu du fichier : Themed.tsx
+
+======================================================================================
+/**
+ * Learn more about Light and Dark modes:
+ * https://docs.expo.io/guides/color-schemes/
+ */
+
+import { Text as DefaultText, View as DefaultView } from 'react-native';
+
+import Colors from '@/constants/Colors';
+import { useColorScheme } from './useColorScheme';
+
+type ThemeProps = {
+  lightColor?: string;
+  darkColor?: string;
+};
+
+export type TextProps = ThemeProps & DefaultText['props'];
+export type ViewProps = ThemeProps & DefaultView['props'];
+
+export function useThemeColor(
+  props: { light?: string; dark?: string },
+  colorName: keyof typeof Colors.light & keyof typeof Colors.dark
+) {
+  const theme = useColorScheme() ?? 'light';
+  const colorFromProps = props[theme];
+
+  if (colorFromProps) {
+    return colorFromProps;
+  } else {
+    return Colors[theme][colorName];
+  }
+}
+
+export function Text(props: TextProps) {
+  const { style, lightColor, darkColor, ...otherProps } = props;
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+
+  return <DefaultText style={[{ color }, style]} {...otherProps} />;
+}
+
+export function View(props: ViewProps) {
+  const { style, lightColor, darkColor, ...otherProps } = props;
+  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+
+  return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
+}
+0
+======================================================================================
+
+Contenu du fichier : useClientOnlyValue.ts
+
+======================================================================================
+// This function is web-only as native doesn't currently support server (or build-time) rendering.
+export function useClientOnlyValue<S, C>(server: S, client: C): S | C {
+  return client;
+}
+0
+======================================================================================
+
+Contenu du fichier : useClientOnlyValue.web.ts
+
+======================================================================================
+import React from 'react';
+
+// `useEffect` is not invoked during server rendering, meaning
+// we can use this to determine if we're on the server or not.
+export function useClientOnlyValue<S, C>(server: S, client: C): S | C {
+  const [value, setValue] = React.useState<S | C>(server);
+  React.useEffect(() => {
+    setValue(client);
+  }, [client]);
+
+  return value;
+}
+0
+======================================================================================
+
+Contenu du fichier : useColorScheme.ts
+
+======================================================================================
+export { useColorScheme } from 'react-native';
+0
+======================================================================================
+
+Contenu du fichier : useColorScheme.web.ts
+
+======================================================================================
+// NOTE: The default React Native styling doesn't support server rendering.
+// Server rendered styles should not change between the first render of the HTML
+// and the first render on the client. Typically, web developers will use CSS media queries
+// to render different styles on the client and server, these aren't directly supported in React Native
+// but can be achieved using a styling library like Nativewind.
+export function useColorScheme() {
+  return 'light';
+}
+0
+======================================================================================
+
+Contenu du fichier : __tests__\StyledText-test.js
+
+======================================================================================
+import * as React from 'react';
+import renderer from 'react-test-renderer';
+
+import { MonoText } from '../StyledText';
+
+it(`renders correctly`, () => {
+  const tree = renderer.create(<MonoText>Snapshot test!</MonoText>).toJSON();
+
+  expect(tree).toMatchSnapshot();
+});
+0

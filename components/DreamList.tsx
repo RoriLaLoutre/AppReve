@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {ScrollView, View, Text, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
-import { TextInput } from 'react-native-paper';
+import { TextInput , Button } from 'react-native-paper';
 
 
 export default function DreamList() {
@@ -12,32 +12,6 @@ export default function DreamList() {
   const [dreams, setDreams] = useState([]);
   const [researchText, setresearchText] = useState('');
   const [researchedDreams, setresearchedDreams] = useState([]);
-
-  const findHashtagIdByLabel = async (hashtag) => {
-    try {
-      const existingDreams = await AsyncStorage.getItem('dreamFormDataArray');
-      let dreamsData = existingDreams ? JSON.parse(existingDreams) : [];
-
-      for (let dream of dreamsData) {
-        for (let hashtagKey in dream.hashtags) {
-          const hashtagStored = dream.hashtags[hashtagKey]; // Récupère l'objet du hashtag stocké
-
-          if (hashtagStored.label === hashtag) {
-            // Si le hashtag est trouvé, renvoie son ID
-            return hashtagStored.id;
-          }
-        }
-      }
-
-      // Si le hashtag n'existe pas, crée un nouvel ID
-      const newId = `hashtag-${Math.random().toString(36).substr(2, 9)}`;
-      return newId;
-
-    } catch (error) {
-      console.error('Erreur lors de la gestion des hashtags:', error);
-      return null;
-    }
-  };
 
 
   // Ce useEffect est executé a chaque fois que le composant est affiché
@@ -47,6 +21,13 @@ export default function DreamList() {
         try {
           const data = await AsyncStorage.getItem('dreamFormDataArray');
           const dreamFormDataArray = data ? JSON.parse(data) : [];
+
+          dreamFormDataArray.sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return dateB - dateA;
+          });
+  
           setDreams(dreamFormDataArray);
         } catch (error) {
           console.error('Erreur lors de la récupération des données:', error);
@@ -54,38 +35,51 @@ export default function DreamList() {
       };
   
       fetchData();
-  
-      return () => {
-        console.log("Nettoyage lorsque l'écran perd le focus.");
-      };
     }, [])
   );
+
+  const deleteDream = async (indexToDelete) => {
+    try {
+      const existingData = await AsyncStorage.getItem('dreamFormDataArray');
+      let dreamFormDataArray = existingData ? JSON.parse(existingData) : [];
+  
+      dreamFormDataArray.splice(indexToDelete, 1); // retire l'index
+  
+      await AsyncStorage.setItem('dreamFormDataArray', JSON.stringify(dreamFormDataArray));
+  
+      setDreams(dreamFormDataArray);
+  
+      console.log(`Rêve à l'index ${indexToDelete} supprimé ✅`);
+    } catch (error) {
+      console.error('Erreur lors de la suppression du rêve:', error);
+    }
+  };
   
 
-   useEffect( () => {
-        const fetchFilteredDreams = async () => {
-            if (!researchText) {
-                setresearchedDreams(dreams)
-                return
-            }
-            const search_hashtag_id = await findHashtagIdByLabel(researchText)
+  //  useEffect( () => {
+  //       const fetchFilteredDreams = async () => {
+  //           if (!researchText) {
+  //               setresearchedDreams(dreams)
+  //               return
+  //           }
+  //           const search_hashtag_id = await findHashtagIdByLabel(researchText)
 
-            const results = dreams.filter((dream) => {
-                if (search_hashtag_id) {
-                    const dream_hashtags = dream.hashtags.map((hashtag) => {
-                        return hashtag.id
-                    })
-                    if (researchText === "" || dream_hashtags.includes(search_hashtag_id)) {
-                        return dream
-                    }
-                }
-            });
+  //           const results = dreams.filter((dream) => {
+  //               if (search_hashtag_id) {
+  //                   const dream_hashtags = dream.hashtags.map((hashtag) => {
+  //                       return hashtag.id
+  //                   })
+  //                   if (researchText === "" || dream_hashtags.includes(search_hashtag_id)) {
+  //                       return dream
+  //                   }
+  //               }
+  //           });
 
-            setresearchedDreams(results);
-            return
-        }
-        fetchFilteredDreams()
-    }, [researchText, dreams]);
+  //           setresearchedDreams(results);
+  //           return
+  //       }
+  //       fetchFilteredDreams()
+  //   }, [researchText, dreams]);
 
 
 
@@ -98,20 +92,55 @@ export default function DreamList() {
         mode="outlined"
       />
 
-      <Text style={styles.title}>Liste des Rêves :</Text>
-      {dreams.map((dream, index) => (
-        <Text key={index} style={styles.dreamText}>
-          {dream.dreamText} - {dream.isLucidDream ? 'Lucide' : 'Non Lucide'} - {dream.todayDate.dateString}
-          <br/>
-          Hashtags:
-          <br/>
-          1. {dream.hashtags[0].id} - {dream.hashtags[0].label}
-          <br/>
-          2. {dream.hashtags[1].id} - {dream.hashtags[1].label}
-          <br/>
-          3. {dream.hashtags[2].id} - {dream.hashtags[2].label}
-        </Text>
-      ))}
+<Text style={styles.title}>Liste des Rêves :</Text>
+
+{dreams.map((dream, index) => (
+  <View key={index} style={styles.dreamCard}>
+    <Text style={styles.date}>
+      📅 {dream.date}
+    </Text>
+
+    <Text style={styles.text}>
+    📝 {dream.dreamText.length > 27 
+        ? dream.dreamText.substring(0, 27) + '...' 
+        : dream.dreamText}
+
+    </Text>
+
+    <Text style={styles.text}>
+      🔮 {dream.isLucidDream ? 'Rêve : Lucide' : 'Rêve : Non Lucide'}
+    </Text>
+
+    <Text style={styles.text}>
+      🧠 Avant : {dream.etatAvant} / Après : {dream.etatApres}
+    </Text>
+
+    <Text style={styles.text}>
+      🌡️ Intensité : {parseFloat(dream.intensite).toFixed(2)} / 🔆 Clarté : {parseFloat(dream.clarte).toFixed(2)}
+    </Text>
+    
+
+    {Array.isArray(dream.hashtags) && dream.hashtags.length > 0 ? (
+      <Text style={styles.text}>
+      🏷️ Mots clés : {dream.hashtags.join(' | ')}
+      </Text>
+    ) : (
+      <Text style={styles.text}>
+      🏷️ Aucun mot clé
+      </Text>
+    )}
+
+    <Button 
+      mode="text" 
+      onPress={() => deleteDream(index)} 
+      style={{ marginTop: 8 }} 
+      textColor="#E53935"
+    >
+      🗑️ Supprimer
+    </Button>
+
+  </View>
+))}
     </ScrollView>
   );
 }
@@ -127,4 +156,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 4,
   },
+
+  dreamCard: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    padding: 15,
+    margin: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  text: {
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  date: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 6,
+  }
+  
 });

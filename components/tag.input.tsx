@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 
-const TagInputComponent = () => {
-    const [tags, setTags] = useState([]);
+const TagInputComponent = ({tags, setTags}) => {
     const [text, setText] = useState('');
     const [editIndex, setEditIndex] = useState(null);
 
@@ -40,6 +39,7 @@ const TagInputComponent = () => {
         <View style={styles.container}>
             <View style={styles.tagContainer}>
                 {tags.map((tag, index) => (
+                    console.log(tags),
                     <View key={index} 
                         style={styles.tagWrapper}>
                         <TouchableOpacity 
@@ -50,7 +50,7 @@ const TagInputComponent = () => {
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity 
-                            onPress={() => removeTag(index)} 
+                            onPress={() => removeTag(index)}
                             style={styles.removeButton}>
                             <Text style={styles.removeButtonText}>
                                 X
@@ -62,7 +62,7 @@ const TagInputComponent = () => {
             <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.input}
-                    placeholder="Ajouter des mots clé pour votre rêve"
+                    placeholder="Ajouter des mots clé"
                     value={text}
                     onChangeText={setText}
                     onSubmitEditing={addTag}
