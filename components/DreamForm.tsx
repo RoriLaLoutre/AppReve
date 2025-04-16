@@ -243,21 +243,6 @@ export default function DreamForm() {
       />
     </View>
 
-    {/* <View>
-      <Button mode="outlined" onPress={() => {
-        console.log("Texte du rêve :", dreamText);
-        console.log("Lucide :", isLucidDream);
-        console.log("Date :", day);
-        console.log("Hashtags :", hashtags);
-        console.log("État avant :", radioBeforeValue);
-        console.log("État après :", radioAfterValue);
-        console.log("Intensité :", intensite);
-        console.log("Clarté :", clarte);
-        }}>
-        Debug
-      </Button>
-    </View> */}
-
     <View style={styles.button}>
       <Button mode="contained" onPress={handleDreamSubmission}>
         Envoyer

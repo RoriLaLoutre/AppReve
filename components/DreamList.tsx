@@ -65,7 +65,7 @@ export default function DreamList() {
 
         if (Array.isArray(dream.hashtags)) {
           return dream.hashtags.some(tag =>
-            tag.toLowerCase() === researchText.trim().toLowerCase()
+            tag.toLowerCase().includes(researchText.trim().toLowerCase())
           );
         }
         return false;
