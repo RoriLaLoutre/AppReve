@@ -111,6 +111,10 @@ export default function DreamList() {
     </Text>
 
     <Text style={styles.text}>
+      🛌 Type de rêve : {dream.dreamType}
+    </Text>
+
+    <Text style={styles.text}>
       🧠 Avant : {dream.etatAvant} / Après : {dream.etatApres}
     </Text>
 
@@ -119,16 +123,13 @@ export default function DreamList() {
     </Text>
     
 
-    {Array.isArray(dream.hashtags) && dream.hashtags.length > 0 ? (
-      <Text style={styles.text}>
-      🏷️ Mots clés : {dream.hashtags.join(' | ')}
-      </Text>
-    ) : (
-      <Text style={styles.text}>
-      🏷️ Aucun mot clé
-      </Text>
-    )}
+    <Text style={styles.text}>
+      🏷️ Mots clés : {Array.isArray(dream.hashtags) && dream.hashtags.length > 0 
+        ? dream.hashtags.join(' | ') 
+        : 'Aucun mot clé'}
+    </Text>
 
+  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
     <Button 
       mode="text" 
       onPress={() => deleteDream(index)} 
@@ -137,6 +138,16 @@ export default function DreamList() {
     >
       🗑️ Supprimer
     </Button>
+
+    <Button 
+      mode="text" 
+      onPress={() => deleteDream(index)} 
+      style={styles.modifyButton} 
+      labelStyle={styles.deleteButtonText}
+    >
+      🗑️ Supprimer
+    </Button>
+  </View>
 
   </View>
 ))}
@@ -179,9 +190,17 @@ const styles = StyleSheet.create({
   deleteButton: {
     backgroundColor: '#ff514d',
     paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     borderRadius: 6,
-    alignSelf: 'center', // pour que le bouton prenne juste la taille du contenu
+    alignSelf: 'flex-start', // pour que le bouton prenne juste la taille du contenu
+    marginTop: 8,
+  },
+  modifyButton: {
+    backgroundColor: '#069c03',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    alignSelf: "flex-end", // pour que le bouton prenne juste la taille du contenu
     marginTop: 8,
   },
   deleteButtonText: {

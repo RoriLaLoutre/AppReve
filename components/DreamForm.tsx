@@ -14,80 +14,37 @@ const { width } = Dimensions.get('window');
 export default function DreamForm() {
   const [dreamText, setDreamText] = useState('');
   const [isLucidDream, setIsLucidDream] = useState(false);
-  const [day, setDay] = useState('');
-  // const [hashtag1, setHashtag1] = useState('');
-  // const [hashtag2, setHashtag2] = useState('');
-  // const [hashtag3, setHashtag3] = useState('');
+  const [day, setDay] = useState("");
   const [hashtags, setHashtags] = useState([]);
   const [radioBeforeValue, setRadioBeforeValue] = useState('normal');
   const [radioAfterValue, setRadioAfterValue] = useState('normal');
   const [clarte, setClarte] = useState(0);
   const [intensite, setIntensite] = useState(0);
+  const [dreamType, setDreamType] = useState('ordinaire');
 
-
-  // const handleDreamSubmission = async () => {
-
-  //   try {
-  //     // Récupérer le tableau actuel depuis AsyncStorage
-  //     const existingData = await AsyncStorage.getItem('dreamFormDataArray');
-  //     const formDataArray = existingData ? JSON.parse(existingData) : [];
-
-  //     // const hashtag1Id = await findHashtagIdByLabel(hashtag1);
-  //     // const hashtag2Id = await findHashtagIdByLabel(hashtag2);
-  //     // const hashtag3Id = await findHashtagIdByLabel(hashtag3);
-
-
-  //     // Ajouter le nouveau formulaire au tableau
-  //     formDataArray.push({
-  //       dreamText: dreamText,
-  //       isLucidDream: isLucidDream,
-  //       todayDate: day,
-  //       hashtags: [
-  //         // { id: hashtag1Id, label: hashtag1 },
-  //         // { id: hashtag2Id, label: hashtag2 },
-  //         // { id: hashtag3Id, label: hashtag3 },
-  //       ],
-  //     });
-
-  //     // Sauvegarder le tableau mis à jour dans AsyncStorage
-  //     await AsyncStorage.setItem('dreamFormDataArray', JSON.stringify(formDataArray));
-
-  //     console.log(
-  //       'AsyncStorage: ',
-  //       AsyncStorage.getItem('dreamFormDataArray')
-  //     );
-
-  //   } catch (error) {
-
-  //     console.error('Erreur lors de la sauvegarde des données:', error);
-  //   }
-
-  //   setDreamText('');
-  //   setIsLucidDream(false);
-  //   // setHashtag1('');
-  //   // setHashtag2('');
-  //   // setHashtag3('');
-  // };
 
   const handleDreamSubmission = async () => {
     try {
       const existingData = await AsyncStorage.getItem('dreamFormDataArray');
       const formDataArray = existingData ? JSON.parse(existingData) : [];
-  
+      
+      let dateToUse = day;
       if (day === "") {
         const today = new Date();
-        const formattedDate = today.toISOString().split('T')[0]; // date du jour au format YYYY-MM-DD
-        setDay(formattedDate );
+        const formattedToday = today.toISOString().split('T')[0];
+        dateToUse = formattedToday;
       }
+
       const newDream = {
         dreamText,
         isLucidDream,
-        date: day,
+        date: dateToUse,
         hashtags: hashtags, // liste
         etatAvant: radioBeforeValue,
         etatApres: radioAfterValue,
         intensite,
         clarte,
+        dreamType,
       };
   
       formDataArray.push(newDream);
@@ -106,8 +63,19 @@ export default function DreamForm() {
       setRadioAfterValue('normal');
       setIntensite(0);
       setClarte(0);
+      setDreamType('ordinaire');
+
     } catch (error) {
       console.error('Erreur lors de la sauvegarde des données:', error);
+    }
+  };
+
+  const clearDreamsOnly = async () => {
+    try {
+      await AsyncStorage.removeItem('dreamFormDataArray');
+      console.log('🧹 Clé "dreamFormDataArray" supprimée.');
+    } catch (e) {
+      console.error('❌ Erreur:', e);
     }
   };
 
@@ -124,32 +92,11 @@ export default function DreamForm() {
         style={[styles.input, { width: width * 0.8, alignSelf: 'center' } , styles.button]}
       />
 
-      {/* <TextInput
-        label="Hashtag 1"
-        value={hashtag1}
-        onChangeText={(hashtag1) => setHashtag1(hashtag1)}
-        mode="outlined"
-        style={[styles.input, { width: width * 0.8, alignSelf: 'center' }]}
-      />
 
-      <TextInput
-        label="Hashtag 2"
-        value={hashtag2}
-        onChangeText={(hashtag2) => setHashtag2(hashtag2)}
-        mode="outlined"
-        style={[styles.input, { width: width * 0.8, alignSelf: 'center' }]}
-      />
-
-      <TextInput
-        label="Hashtag 3"
-        value={hashtag3}
-        onChangeText={(hashtag3) => setHashtag3(hashtag3)}
-        mode="outlined"
-        style={[styles.input, { width: width * 0.8, alignSelf: 'center' }]}
-      /> */}
 
       <RNPickerSelect
-        onValueChange={(value) => console.log(value)}
+        onValueChange={(value) => setDreamType(value)}
+        value={dreamType}
         placeholder={{ label: 'Sélectionner un type de rêve', value: "ordinaire" }}
         items={[
           { label: 'Cauchemar', value: 'cauchemar' },
@@ -247,6 +194,10 @@ export default function DreamForm() {
       <Button mode="contained" onPress={handleDreamSubmission}>
         Envoyer
       </Button>
+
+      {/* <Button mode="contained" onPress={clearDreamsOnly} style={styles.button}>
+        effacer reve attention
+      </Button> */}
     </View>
 
   </View>
