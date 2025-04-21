@@ -20,80 +20,37 @@ const { width } = Dimensions.get('window');
 export default function DreamForm() {
   const [dreamText, setDreamText] = useState('');
   const [isLucidDream, setIsLucidDream] = useState(false);
-  const [day, setDay] = useState('');
-  // const [hashtag1, setHashtag1] = useState('');
-  // const [hashtag2, setHashtag2] = useState('');
-  // const [hashtag3, setHashtag3] = useState('');
+  const [day, setDay] = useState("");
   const [hashtags, setHashtags] = useState([]);
   const [radioBeforeValue, setRadioBeforeValue] = useState('normal');
   const [radioAfterValue, setRadioAfterValue] = useState('normal');
   const [clarte, setClarte] = useState(0);
   const [intensite, setIntensite] = useState(0);
+  const [dreamType, setDreamType] = useState('ordinaire');
 
-
-  // const handleDreamSubmission = async () => {
-
-  //   try {
-  //     // Récupérer le tableau actuel depuis AsyncStorage
-  //     const existingData = await AsyncStorage.getItem('dreamFormDataArray');
-  //     const formDataArray = existingData ? JSON.parse(existingData) : [];
-
-  //     // const hashtag1Id = await findHashtagIdByLabel(hashtag1);
-  //     // const hashtag2Id = await findHashtagIdByLabel(hashtag2);
-  //     // const hashtag3Id = await findHashtagIdByLabel(hashtag3);
-
-
-  //     // Ajouter le nouveau formulaire au tableau
-  //     formDataArray.push({
-  //       dreamText: dreamText,
-  //       isLucidDream: isLucidDream,
-  //       todayDate: day,
-  //       hashtags: [
-  //         // { id: hashtag1Id, label: hashtag1 },
-  //         // { id: hashtag2Id, label: hashtag2 },
-  //         // { id: hashtag3Id, label: hashtag3 },
-  //       ],
-  //     });
-
-  //     // Sauvegarder le tableau mis à jour dans AsyncStorage
-  //     await AsyncStorage.setItem('dreamFormDataArray', JSON.stringify(formDataArray));
-
-  //     console.log(
-  //       'AsyncStorage: ',
-  //       AsyncStorage.getItem('dreamFormDataArray')
-  //     );
-
-  //   } catch (error) {
-
-  //     console.error('Erreur lors de la sauvegarde des données:', error);
-  //   }
-
-  //   setDreamText('');
-  //   setIsLucidDream(false);
-  //   // setHashtag1('');
-  //   // setHashtag2('');
-  //   // setHashtag3('');
-  // };
 
   const handleDreamSubmission = async () => {
     try {
       const existingData = await AsyncStorage.getItem('dreamFormDataArray');
       const formDataArray = existingData ? JSON.parse(existingData) : [];
-  
+      
+      let dateToUse = day;
       if (day === "") {
         const today = new Date();
-        const formattedDate = today.toISOString().split('T')[0]; // date du jour au format YYYY-MM-DD
-        setDay(formattedDate );
+        const formattedToday = today.toISOString().split('T')[0];
+        dateToUse = formattedToday;
       }
+
       const newDream = {
         dreamText,
         isLucidDream,
-        date: day,
+        date: dateToUse,
         hashtags: hashtags, // liste
         etatAvant: radioBeforeValue,
         etatApres: radioAfterValue,
         intensite,
         clarte,
+        dreamType,
       };
   
       formDataArray.push(newDream);
@@ -112,8 +69,19 @@ export default function DreamForm() {
       setRadioAfterValue('normal');
       setIntensite(0);
       setClarte(0);
+      setDreamType('ordinaire');
+
     } catch (error) {
       console.error('Erreur lors de la sauvegarde des données:', error);
+    }
+  };
+
+  const clearDreamsOnly = async () => {
+    try {
+      await AsyncStorage.removeItem('dreamFormDataArray');
+      console.log('🧹 Clé "dreamFormDataArray" supprimée.');
+    } catch (e) {
+      console.error('❌ Erreur:', e);
     }
   };
 
@@ -130,32 +98,11 @@ export default function DreamForm() {
         style={[styles.input, { width: width * 0.8, alignSelf: 'center' } , styles.button]}
       />
 
-      {/* <TextInput
-        label="Hashtag 1"
-        value={hashtag1}
-        onChangeText={(hashtag1) => setHashtag1(hashtag1)}
-        mode="outlined"
-        style={[styles.input, { width: width * 0.8, alignSelf: 'center' }]}
-      />
 
-      <TextInput
-        label="Hashtag 2"
-        value={hashtag2}
-        onChangeText={(hashtag2) => setHashtag2(hashtag2)}
-        mode="outlined"
-        style={[styles.input, { width: width * 0.8, alignSelf: 'center' }]}
-      />
-
-      <TextInput
-        label="Hashtag 3"
-        value={hashtag3}
-        onChangeText={(hashtag3) => setHashtag3(hashtag3)}
-        mode="outlined"
-        style={[styles.input, { width: width * 0.8, alignSelf: 'center' }]}
-      /> */}
 
       <RNPickerSelect
-        onValueChange={(value) => console.log(value)}
+        onValueChange={(value) => setDreamType(value)}
+        value={dreamType}
         placeholder={{ label: 'Sélectionner un type de rêve', value: "ordinaire" }}
         items={[
           { label: 'Cauchemar', value: 'cauchemar' },
@@ -249,25 +196,14 @@ export default function DreamForm() {
       />
     </View>
 
-    {/* <View>
-      <Button mode="outlined" onPress={() => {
-        console.log("Texte du rêve :", dreamText);
-        console.log("Lucide :", isLucidDream);
-        console.log("Date :", day);
-        console.log("Hashtags :", hashtags);
-        console.log("État avant :", radioBeforeValue);
-        console.log("État après :", radioAfterValue);
-        console.log("Intensité :", intensite);
-        console.log("Clarté :", clarte);
-        }}>
-        Debug
-      </Button>
-    </View> */}
-
     <View style={styles.button}>
       <Button mode="contained" onPress={handleDreamSubmission}>
         Envoyer
       </Button>
+
+      {/* <Button mode="contained" onPress={clearDreamsOnly} style={styles.button}>
+        effacer reve attention
+      </Button> */}
     </View>
 
   </View>
@@ -322,8 +258,6 @@ const styles = StyleSheet.create({
 });
 
 
-
-  0
 ======================================================================================
 
 Contenu du fichier : DreamList.tsx
@@ -442,6 +376,10 @@ export default function DreamList() {
     </Text>
 
     <Text style={styles.text}>
+      🛌 Type de rêve : {dream.dreamType}
+    </Text>
+
+    <Text style={styles.text}>
       🧠 Avant : {dream.etatAvant} / Après : {dream.etatApres}
     </Text>
 
@@ -450,16 +388,13 @@ export default function DreamList() {
     </Text>
     
 
-    {Array.isArray(dream.hashtags) && dream.hashtags.length > 0 ? (
-      <Text style={styles.text}>
-      🏷️ Mots clés : {dream.hashtags.join(' | ')}
-      </Text>
-    ) : (
-      <Text style={styles.text}>
-      🏷️ Aucun mot clé
-      </Text>
-    )}
+    <Text style={styles.text}>
+      🏷️ Mots clés : {Array.isArray(dream.hashtags) && dream.hashtags.length > 0 
+        ? dream.hashtags.join(' | ') 
+        : 'Aucun mot clé'}
+    </Text>
 
+  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
     <Button 
       mode="text" 
       onPress={() => deleteDream(index)} 
@@ -468,6 +403,16 @@ export default function DreamList() {
     >
       🗑️ Supprimer
     </Button>
+
+    <Button 
+      mode="text" 
+      onPress={() => deleteDream(index)} 
+      style={styles.modifyButton} 
+      labelStyle={styles.deleteButtonText}
+    >
+      🗑️ Supprimer
+    </Button>
+  </View>
 
   </View>
 ))}
@@ -510,9 +455,17 @@ const styles = StyleSheet.create({
   deleteButton: {
     backgroundColor: '#ff514d',
     paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     borderRadius: 6,
-    alignSelf: 'center', // pour que le bouton prenne juste la taille du contenu
+    alignSelf: 'flex-start', // pour que le bouton prenne juste la taille du contenu
+    marginTop: 8,
+  },
+  modifyButton: {
+    backgroundColor: '#069c03',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    alignSelf: "flex-end", // pour que le bouton prenne juste la taille du contenu
     marginTop: 8,
   },
   deleteButtonText: {
@@ -521,90 +474,7 @@ const styles = StyleSheet.create({
   }
   
 });
-0
-======================================================================================
 
-Contenu du fichier : EditScreenInfo.tsx
-
-======================================================================================
-import React from 'react';
-import { StyleSheet } from 'react-native';
-
-import { ExternalLink } from './ExternalLink';
-import { MonoText } from './StyledText';
-import { Text, View } from './Themed';
-
-import Colors from '@/constants/Colors';
-
-export default function EditScreenInfo({ path }: { path: string }) {
-  return (
-    <View>
-      <View style={styles.getStartedContainer}>
-        <Text
-          style={styles.getStartedText}
-          lightColor="rgba(0,0,0,0.8)"
-          darkColor="rgba(255,255,255,0.8)">
-          Open up the code for this screen:
-        </Text>
-
-        <View
-          style={[styles.codeHighlightContainer, styles.homeScreenFilename]}
-          darkColor="rgba(255,255,255,0.05)"
-          lightColor="rgba(0,0,0,0.05)">
-          <MonoText>{path}</MonoText>
-        </View>
-
-        <Text
-          style={styles.getStartedText}
-          lightColor="rgba(0,0,0,0.8)"
-          darkColor="rgba(255,255,255,0.8)">
-          Change any of the text, save the file, and your app will automatically update.
-        </Text>
-      </View>
-
-      <View style={styles.helpContainer}>
-        <ExternalLink
-          style={styles.helpLink}
-          href="https://docs.expo.io/get-started/create-a-new-app/#opening-the-app-on-your-phonetablet">
-          <Text style={styles.helpLinkText} lightColor={Colors.light.tint}>
-            Tap here if your app doesn't automatically update after making changes
-          </Text>
-        </ExternalLink>
-      </View>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  getStartedContainer: {
-    alignItems: 'center',
-    marginHorizontal: 50,
-  },
-  homeScreenFilename: {
-    marginVertical: 7,
-  },
-  codeHighlightContainer: {
-    borderRadius: 3,
-    paddingHorizontal: 4,
-  },
-  getStartedText: {
-    fontSize: 17,
-    lineHeight: 24,
-    textAlign: 'center',
-  },
-  helpContainer: {
-    marginTop: 15,
-    marginHorizontal: 20,
-    alignItems: 'center',
-  },
-  helpLink: {
-    paddingVertical: 15,
-  },
-  helpLinkText: {
-    textAlign: 'center',
-  },
-});
-0
 ======================================================================================
 
 Contenu du fichier : ExternalLink.tsx

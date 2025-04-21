@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import EditScreenInfo from '@/components/EditScreenInfo';
+import EditScreenInfo from '@/app/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 import DreamList from '@/components/DreamList';
 

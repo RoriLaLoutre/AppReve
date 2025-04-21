@@ -3,8 +3,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {ScrollView, View, Text, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, router } from 'expo-router';
 import { TextInput , Button } from 'react-native-paper';
+
 
 
 export default function DreamList() {
@@ -141,11 +142,11 @@ export default function DreamList() {
 
     <Button 
       mode="text" 
-      onPress={() => deleteDream(index)} 
+      onPress={() => router.push(`/EditScreenInfo?index=${index}`)} 
       style={styles.modifyButton} 
       labelStyle={styles.deleteButtonText}
     >
-      🗑️ Supprimer
+      ✏️ Modifier
     </Button>
   </View>
 
